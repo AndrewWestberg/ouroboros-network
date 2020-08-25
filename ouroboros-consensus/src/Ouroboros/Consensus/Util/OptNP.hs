@@ -81,7 +81,6 @@ fromSingleton = go
   where
     go :: OptNP 'False f '[x] -> f x
     go (OptCons x _) = x
-    go (OptSkip xs)  = case xs of {}
 
 ap ::
      NP (f -.-> g) xs

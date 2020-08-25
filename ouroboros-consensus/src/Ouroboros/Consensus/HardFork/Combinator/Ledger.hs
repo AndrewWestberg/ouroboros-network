@@ -406,7 +406,6 @@ mkHardForkForecast =
     go PNil         (TZ f)      = forecastFinalEra f
     go (PCons g _)  (TZ f)      = forecastNotFinal g f
     go (PCons _ gs) (TS past f) = mapForecast (shiftView past) $ go gs f
-    go PNil         (TS _ f)    = case f of {}
 
 -- | Construct forecast when we're in the final era.
 --
