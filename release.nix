@@ -77,22 +77,22 @@ let
 
   jobs = {
     native = mapTestOn (__trace (__toJSON (packagePlatforms project)) (packagePlatforms project));
-    "${mingwW64.config}" = recursiveUpdate (mapTestOnCross mingwW64 (packagePlatformsCross project)) disabledMingwW64Tests;
+    #"${mingwW64.config}" = recursiveUpdate (mapTestOnCross mingwW64 (packagePlatformsCross project)) disabledMingwW64Tests;
     # TODO: fix broken evals
     #musl64 = mapTestOnCross musl64 (packagePlatformsCross project);
   } // (mkRequiredJob (concatLists [
-    (collectJobs jobs."${mingwW64.config}".checks.tests)
+    # (collectJobs jobs."${mingwW64.config}".checks.tests)
     (collectJobs jobs.native.checks)
     (collectJobs jobs.native.benchmarks)
     (collectJobs jobs.native.libs)
     (collectJobs jobs.native.exes)
   ])) // {
     # This is used for testing the build on windows.
-    ouroboros-network-tests-win64 = pkgs.callPackage ./nix/windows-testing-bundle.nix {
-      inherit project;
-      tests = collectJobs jobs."${mingwW64.config}".tests;
-      benchmarks = collectJobs jobs."${mingwW64.config}".benchmarks;
-    };
+    #ouroboros-network-tests-win64 = pkgs.callPackage ./nix/windows-testing-bundle.nix {
+    #  inherit project;
+    #  tests = collectJobs jobs."${mingwW64.config}".tests;
+    #  benchmarks = collectJobs jobs."${mingwW64.config}".benchmarks;
+    #};
   };
 
 in jobs
