@@ -54,7 +54,6 @@ import qualified Ouroboros.Consensus.Protocol.PBFT.State as PBftState
 import           Ouroboros.Consensus.Shelley.Ledger
 import           Ouroboros.Consensus.Shelley.Node ()
 import           Ouroboros.Consensus.Shelley.Protocol
-import           Ouroboros.Consensus.Shelley.Protocol.State (TPraosState)
 import qualified Ouroboros.Consensus.Shelley.Protocol.State as TPraosState
 
 
