@@ -1,10 +1,11 @@
-{-# LANGUAGE DataKinds           #-}
-{-# LANGUAGE GADTs               #-}
-{-# LANGUAGE NamedFieldPuns      #-}
-{-# LANGUAGE PolyKinds           #-}
-{-# LANGUAGE RankNTypes          #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE NamedFieldPuns        #-}
+{-# LANGUAGE PolyKinds             #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 
 module Ouroboros.Network.Protocol.LocalStateQuery.Codec (
     codecLocalStateQuery
@@ -31,7 +32,9 @@ data Some (f :: k -> Type) where
 
 codecLocalStateQuery
   :: forall block query m.
-     MonadST m
+     ( MonadST m
+     , forall result. Show (query result)
+     )
   => (Point block -> CBOR.Encoding)
   -> (forall s . CBOR.Decoder s (Point block))
   -> (forall result . query result -> CBOR.Encoding)
