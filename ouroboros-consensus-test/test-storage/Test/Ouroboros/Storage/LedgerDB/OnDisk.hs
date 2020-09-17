@@ -515,8 +515,8 @@ runMock cmd initMock =
 -------------------------------------------------------------------------------}
 
 -- | Arguments required by 'StandaloneDB'
-data DbEnv m = forall fh. DbEnv {
-      dbHasFS     :: HasFS m fh
+data DbEnv m = DbEnv {
+      dbHasFS     :: SomeHasFS m
     , dbLgrParams :: LedgerDbParams
     }
 
@@ -639,7 +639,7 @@ runDB standalone@DB{..} cmd =
     p :: Proxy t
     p = Proxy
 
-    go :: HasFS m fh -> Cmd t DiskSnapshot -> m (Success t DiskSnapshot)
+    go :: SomeHasFS m -> Cmd t DiskSnapshot -> m (Success t DiskSnapshot)
     go _ Current =
         atomically $ (Ledger . ledgerDbCurrent . snd) <$> readTVar dbState
     go _ (Push b) = do
@@ -719,8 +719,8 @@ runDB standalone@DB{..} cmd =
           Right db' -> do atomically $ writeTVar dbState (f rs, db')
                           return $ MaybeErr (Right ())
 
-    truncateSnapshot :: HasFS m fh -> DiskSnapshot -> m ()
-    truncateSnapshot hasFS@HasFS{..} ss =
+    truncateSnapshot :: SomeHasFS m -> DiskSnapshot -> m ()
+    truncateSnapshot (SomeHasFS hasFS@HasFS{..}) ss =
         withFile hasFS (snapshotToPath ss) (AppendMode AllowExisting) $ \h ->
           hTruncate h 0
 
@@ -1002,7 +1002,7 @@ propCmds :: LUT t
 propCmds lgrDbParams cmds = do
     fs <- QC.run $ uncheckedNewTVarM MockFS.empty
     let dbEnv :: DbEnv IO
-        dbEnv = DbEnv (simHasFS fs) lgrDbParams
+        dbEnv = DbEnv (SomeHasFS (simHasFS fs)) lgrDbParams
     db <- QC.run $ initStandaloneDB dbEnv
     let sm' = sm lgrDbParams db
     (hist, _model, res) <- runCommands sm' cmds

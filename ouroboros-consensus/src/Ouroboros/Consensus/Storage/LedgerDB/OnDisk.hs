@@ -155,10 +155,10 @@ data InitLog r =
 -- /compute/ all subsequent ones. This is important, because the ledger states
 -- obtained in this way will (hopefully) share much of their memory footprint
 -- with their predecessors.
-initLedgerDB :: forall m h l r b. (IOLike m, ApplyBlock l b, HasCallStack)
+initLedgerDB :: forall m l r b. (IOLike m, ApplyBlock l b, HasCallStack)
              => Tracer m (TraceReplayEvent r ())
              -> Tracer m (TraceEvent r)
-             -> HasFS m h
+             -> SomeHasFS m
              -> (forall s. Decoder s l)
              -> (forall s. Decoder s r)
              -> LedgerDbParams
@@ -227,9 +227,9 @@ data InitFailure r =
 -- If the chain DB or ledger layer reports an error, the whole thing is aborted
 -- and an error is returned. This should not throw any errors itself (ignoring
 -- unexpected exceptions such as asynchronous exceptions, of course).
-initFromSnapshot :: forall m h l r b. (IOLike m, ApplyBlock l b, HasCallStack)
+initFromSnapshot :: forall m l r b. (IOLike m, ApplyBlock l b, HasCallStack)
                  => Tracer m (TraceReplayEvent r ())
-                 -> HasFS m h
+                 -> SomeHasFS m
                  -> (forall s. Decoder s l)
                  -> (forall s. Decoder s r)
                  -> LedgerDbParams
@@ -278,9 +278,9 @@ initStartingWith tracer conf streamAPI initDb = do
 -- is more than @k@ back).
 --
 -- TODO: Should we delete the file if an error occurs during writing?
-takeSnapshot :: forall m l r h. MonadThrow m
+takeSnapshot :: forall m l r. MonadThrow m
              => Tracer m (TraceEvent r)
-             -> HasFS m h
+             -> SomeHasFS m
              -> (l -> Encoding)
              -> (r -> Encoding)
              -> LedgerDB l r -> m (DiskSnapshot, WithOrigin r)
@@ -299,7 +299,7 @@ takeSnapshot tracer hasFS encLedger encRef db = do
 -- The deleted snapshots are returned.
 trimSnapshots :: Monad m
               => Tracer m (TraceEvent r)
-              -> HasFS m h
+              -> SomeHasFS m
               -> DiskPolicy
               -> m [DiskSnapshot]
 trimSnapshots tracer hasFS DiskPolicy{..} = do
@@ -325,8 +325,8 @@ nextAvailable [] = DiskSnapshot 1
 nextAvailable ss = let DiskSnapshot n = maximum ss in DiskSnapshot (n + 1)
 
 -- | Read snapshot from disk
-readSnapshot :: forall m l r h. (IOLike m)
-             => HasFS m h
+readSnapshot :: forall m l r. (IOLike m)
+             => SomeHasFS m
              -> (forall s. Decoder s l)
              -> (forall s. Decoder s r)
              -> DiskSnapshot
@@ -340,12 +340,12 @@ readSnapshot hasFS decLedger decRef =
     decoder = decodeChainSummary decLedger decRef
 
 -- | Write snapshot to disk
-writeSnapshot :: forall m l r h. MonadThrow m
-              => HasFS m h
+writeSnapshot :: forall m l r. MonadThrow m
+              => SomeHasFS m
               -> (l -> Encoding)
               -> (r -> Encoding)
               -> DiskSnapshot -> ChainSummary l r -> m ()
-writeSnapshot hasFS encLedger encRef ss cs = do
+writeSnapshot (SomeHasFS hasFS) encLedger encRef ss cs = do
     withFile hasFS (snapshotToPath ss) (WriteMode MustBeNew) $ \h ->
       void $ hPut hasFS h $ CBOR.toBuilder (encode cs)
   where
@@ -353,12 +353,12 @@ writeSnapshot hasFS encLedger encRef ss cs = do
     encode = encodeChainSummary encLedger encRef
 
 -- | Delete snapshot from disk
-deleteSnapshot :: HasCallStack => HasFS m h -> DiskSnapshot -> m ()
-deleteSnapshot HasFS{..} = removeFile . snapshotToPath
+deleteSnapshot :: HasCallStack => SomeHasFS m -> DiskSnapshot -> m ()
+deleteSnapshot (SomeHasFS HasFS{..}) = removeFile . snapshotToPath
 
 -- | List on-disk snapshots, most recent first
-listSnapshots :: Monad m => HasFS m h -> m [DiskSnapshot]
-listSnapshots HasFS{..} =
+listSnapshots :: Monad m => SomeHasFS m -> m [DiskSnapshot]
+listSnapshots (SomeHasFS HasFS{..}) =
     aux <$> listDirectory (mkFsPath [])
   where
     aux :: Set String -> [DiskSnapshot]

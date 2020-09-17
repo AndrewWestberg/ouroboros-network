@@ -228,7 +228,9 @@ initFromDisk
   -> Tracer m (TraceReplayEvent (RealPoint blk) ())
   -> ImmutableDB m blk
   -> m (LedgerDB blk, Word64)
-initFromDisk LgrDbArgs { lgrHasFS = SomeHasFS hasFS, .. } replayTracer immutableDB = wrapFailure $ do
+initFromDisk LgrDbArgs { lgrHasFS = hasFS, .. }
+             replayTracer
+             immutableDB = wrapFailure $ do
     (_initLog, db, replayed) <-
       LedgerDB.initLedgerDB
         replayTracer
@@ -331,7 +333,7 @@ currentPoint = castPoint
 takeSnapshot :: forall m blk.
                 (IOLike m, LgrDbSerialiseConstraints blk)
              => LgrDB m blk -> m (DiskSnapshot, Point blk)
-takeSnapshot lgrDB@LgrDB{ cfg, tracer, hasFS = SomeHasFS hasFS } = wrapFailure $ do
+takeSnapshot lgrDB@LgrDB{ cfg, tracer, hasFS } = wrapFailure $ do
     ledgerDB <- atomically $ getCurrent lgrDB
     second withOriginRealPointToPoint <$> LedgerDB.takeSnapshot
       tracer
@@ -349,7 +351,7 @@ takeSnapshot lgrDB@LgrDB{ cfg, tracer, hasFS = SomeHasFS hasFS } = wrapFailure $
                               (encodeDisk ccfg)
 
 trimSnapshots :: MonadCatch m => LgrDB m blk -> m [DiskSnapshot]
-trimSnapshots LgrDB { diskPolicy, tracer, hasFS = SomeHasFS hasFS } = wrapFailure $
+trimSnapshots LgrDB { diskPolicy, tracer, hasFS } = wrapFailure $
     LedgerDB.trimSnapshots tracer hasFS diskPolicy
 
 getDiskPolicy :: LgrDB m blk -> DiskPolicy
