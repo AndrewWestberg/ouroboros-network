@@ -48,12 +48,13 @@ module Test.Util.TestBlock (
   , testInitLedger
   , testInitExtLedger
   , singleNodeTestConfig
+  , singleNodeTestConfigWithK
     -- * Support for tests
   , Permutation(..)
   , permute
   ) where
 
-import           Codec.Serialise (Serialise)
+import           Codec.Serialise (Serialise (..))
 import           Control.DeepSeq (force)
 import           Control.Monad.Except (throwError)
 import           Data.FingerTree.Strict (Measured (..))
@@ -396,7 +397,10 @@ testInitExtLedger = ExtLedgerState {
 
 -- | Trivial test configuration with a single core node
 singleNodeTestConfig :: TopLevelConfig TestBlock
-singleNodeTestConfig = TopLevelConfig {
+singleNodeTestConfig = singleNodeTestConfigWithK (SecurityParam 4)
+
+singleNodeTestConfigWithK :: SecurityParam -> TopLevelConfig TestBlock
+singleNodeTestConfigWithK k = TopLevelConfig {
       topLevelConfigProtocol = BftConfig {
           bftParams  = BftParams { bftSecurityParam = k
                                  , bftNumNodes      = numCoreNodes
@@ -417,9 +421,6 @@ singleNodeTestConfig = TopLevelConfig {
 
     eraParams :: HardFork.EraParams
     eraParams = HardFork.defaultEraParams k slotLength
-
-    -- We fix k at 4 for now
-    k = SecurityParam 4
 
 {-------------------------------------------------------------------------------
   Chain of blocks
@@ -587,3 +588,19 @@ permute (Permutation n) = go (R.mkStdGen n)
     go g as = let (i, g')           = R.randomR (0, length as - 1) g
                   (before, a:after) = splitAt i as
               in a : go g' (before ++ after)
+
+{-------------------------------------------------------------------------------
+  Additional Serialise instances
+-------------------------------------------------------------------------------}
+
+instance Serialise (AnnTip TestBlock) where
+  encode = defaultEncodeAnnTip encode
+  decode = defaultDecodeAnnTip decode
+
+instance Serialise (ExtLedgerState TestBlock) where
+  encode = encodeExtLedgerState encode encode encode
+  decode = decodeExtLedgerState decode decode decode
+
+instance Serialise (RealPoint TestBlock) where
+  encode = encodeRealPoint encode
+  decode = decodeRealPoint decode
