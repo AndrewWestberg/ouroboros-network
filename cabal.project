@@ -1,4 +1,4 @@
-index-state: 2020-07-15T00:00:00Z
+index-state: 2020-09-15T00:00:00Z
 
 packages: ./typed-protocols
           ./typed-protocols-examples
@@ -131,48 +131,48 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-prelude
-  tag: 0c5b0a6619fadf22f4d62a12154e181a6d035c1c
+  tag: a87dc6dbeae6944e0cd4117aa5eff9233cee1d6a
   --sha256: 0qjn7xsw5py05zmq9935z91719v5i4apsizwhkwppi8dahbanrs4
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-prelude
-  tag: 0c5b0a6619fadf22f4d62a12154e181a6d035c1c
+  tag: a87dc6dbeae6944e0cd4117aa5eff9233cee1d6a
   --sha256: 0qjn7xsw5py05zmq9935z91719v5i4apsizwhkwppi8dahbanrs4
   subdir: test
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-base
-  tag: 13f44ad35d2762dbf98b3d3be56b7ba2adf515f4
+  tag: 775a59faddccc1f26e82662088d4ecc52d0ee044
   --sha256: 0sl7adyrjf3w6025gvljxyr222s53avin0sv0gzhdypmj9wg5ml6
   subdir: binary
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-base
-  tag: 13f44ad35d2762dbf98b3d3be56b7ba2adf515f4
+  tag: 775a59faddccc1f26e82662088d4ecc52d0ee044
   --sha256: 0sl7adyrjf3w6025gvljxyr222s53avin0sv0gzhdypmj9wg5ml6
   subdir: binary/test
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-base
-  tag: 13f44ad35d2762dbf98b3d3be56b7ba2adf515f4
+  tag: 775a59faddccc1f26e82662088d4ecc52d0ee044
   --sha256: 0sl7adyrjf3w6025gvljxyr222s53avin0sv0gzhdypmj9wg5ml6
   subdir: cardano-crypto-class
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-base
-  tag: 13f44ad35d2762dbf98b3d3be56b7ba2adf515f4
+  tag: 775a59faddccc1f26e82662088d4ecc52d0ee044
   --sha256: 0sl7adyrjf3w6025gvljxyr222s53avin0sv0gzhdypmj9wg5ml6
   subdir: cardano-crypto-praos
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-base
-  tag: 13f44ad35d2762dbf98b3d3be56b7ba2adf515f4
+  tag: 775a59faddccc1f26e82662088d4ecc52d0ee044
   --sha256: 0sl7adyrjf3w6025gvljxyr222s53avin0sv0gzhdypmj9wg5ml6
   subdir: slotting
 
