@@ -70,6 +70,7 @@ import           Ouroboros.Consensus.HeaderStateHistory
 import           Ouroboros.Consensus.HeaderValidation
 import           Ouroboros.Consensus.Ledger.Abstract
 import           Ouroboros.Consensus.Ledger.Extended
+import           Ouroboros.Consensus.Ledger.Inspect
 import           Ouroboros.Consensus.Ledger.SupportsProtocol
 import           Ouroboros.Consensus.Protocol.Abstract
 import           Ouroboros.Consensus.Util.Args
@@ -175,6 +176,7 @@ openDB :: forall m blk.
           ( IOLike m
           , LedgerSupportsProtocol blk
           , LgrDbSerialiseConstraints blk
+          , InspectLedger blk
           , HasCallStack
           )
        => LgrDbArgs Identity m blk
@@ -218,6 +220,7 @@ initFromDisk
      ( IOLike m
      , LedgerSupportsProtocol blk
      , LgrDbSerialiseConstraints blk
+     , InspectLedger blk
      , HasCallStack
      )
   => LgrDbArgs Identity m blk

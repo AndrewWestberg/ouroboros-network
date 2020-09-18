@@ -88,6 +88,7 @@ import qualified Ouroboros.Consensus.HardFork.History as HardFork
 import           Ouroboros.Consensus.HeaderValidation
 import           Ouroboros.Consensus.Ledger.Abstract
 import           Ouroboros.Consensus.Ledger.Extended
+import           Ouroboros.Consensus.Ledger.Inspect
 import           Ouroboros.Consensus.Ledger.SupportsProtocol
 import           Ouroboros.Consensus.Node.NetworkProtocolVersion
 import           Ouroboros.Consensus.Node.ProtocolInfo
@@ -340,6 +341,9 @@ newtype instance Ticked (LedgerState TestBlock) = TickedTestLedger {
     }
 
 instance UpdateLedger TestBlock
+
+instance InspectLedger TestBlock where
+  -- Defaults are fine
 
 -- | Last applied block
 --

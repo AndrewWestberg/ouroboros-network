@@ -53,6 +53,7 @@ import           Text.Read (readMaybe)
 
 import           Ouroboros.Consensus.Block
 import           Ouroboros.Consensus.Ledger.Extended
+import           Ouroboros.Consensus.Ledger.Inspect
 import           Ouroboros.Consensus.Ledger.SupportsProtocol
 import           Ouroboros.Consensus.Util.CBOR (ReadIncrementalErr,
                      readIncremental)
@@ -178,7 +179,12 @@ data InitLog blk =
 -- obtained in this way will (hopefully) share much of their memory footprint
 -- with their predecessors.
 initLedgerDB ::
-     forall m blk. (IOLike m, LedgerSupportsProtocol blk, HasCallStack)
+     forall m blk. (
+         IOLike m
+       , LedgerSupportsProtocol blk
+       , InspectLedger blk
+       , HasCallStack
+       )
   => Tracer m (TraceReplayEvent blk ())
   -> Tracer m (TraceEvent blk)
   -> SomeHasFS m
@@ -251,7 +257,12 @@ data InitFailure blk =
 -- and an error is returned. This should not throw any errors itself (ignoring
 -- unexpected exceptions such as asynchronous exceptions, of course).
 initFromSnapshot ::
-     forall m blk. (IOLike m, LedgerSupportsProtocol blk, HasCallStack)
+     forall m blk. (
+         IOLike m
+       , LedgerSupportsProtocol blk
+       , InspectLedger blk
+       , HasCallStack
+       )
   => Tracer m (TraceReplayEvent blk ())
   -> SomeHasFS m
   -> (forall s. Decoder s (ExtLedgerState blk))
@@ -270,7 +281,12 @@ initFromSnapshot tracer hasFS decLedger decRef params conf streamAPI ss = do
 
 -- | Attempt to initialize the ledger DB starting from the given ledger DB
 initStartingWith ::
-     forall m blk. (Monad m, LedgerSupportsProtocol blk, HasCallStack)
+     forall m blk. (
+         Monad m
+       , LedgerSupportsProtocol blk
+       , InspectLedger blk
+       , HasCallStack
+       )
   => Tracer m (TraceReplayEvent blk ())
   -> ExtLedgerCfg blk
   -> StreamAPI m blk
@@ -284,9 +300,19 @@ initStartingWith tracer conf streamAPI initDb = do
   where
     push :: blk -> (LedgerDB' blk, Word64) -> m (LedgerDB' blk, Word64)
     push blk !(!db, !replayed) = do
-        traceWith tracer (ReplayedBlock (blockRealPoint blk) ())
-        (, replayed + 1) <$>
-          ledgerDbPush conf (ReapplyVal (blockRealPoint blk) blk) db
+        !db' <- ledgerDbPush conf (ReapplyVal (blockRealPoint blk) blk) db
+
+        let replayed' :: Word64
+            !replayed' = replayed + 1
+
+            events :: [LedgerEvent blk]
+            events = inspectLedger
+                       (getExtLedgerCfg conf)
+                       (ledgerState (ledgerDbCurrent db))
+                       (ledgerState (ledgerDbCurrent db'))
+
+        traceWith tracer (ReplayedBlock (blockRealPoint blk) events ())
+        return (db', replayed')
 
 {-------------------------------------------------------------------------------
   Write to disk
@@ -433,7 +459,7 @@ data TraceReplayEvent blk replayTo
     --
     -- The @replayTo@ parameter corresponds to the block at the tip of the
     -- ImmutableDB, i.e., the last block to replay.
-  | ReplayedBlock (RealPoint blk) replayTo
+  | ReplayedBlock (RealPoint blk) [LedgerEvent blk] replayTo
     -- ^ We replayed the given block (reference) on the genesis snapshot
     -- during the initialisation of the LedgerDB.
     --
