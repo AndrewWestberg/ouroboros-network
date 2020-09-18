@@ -44,7 +44,6 @@ import qualified Data.List as L
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import           Data.Maybe (fromJust)
-import           Data.Proxy
 import           Data.Word
 import           GHC.Generics (Generic)
 import           System.Random (getStdRandom, randomR)
@@ -60,9 +59,10 @@ import           Test.Tasty (TestTree, testGroup)
 import           Test.Tasty.QuickCheck (testProperty)
 
 import           Ouroboros.Consensus.Block
-import           Ouroboros.Consensus.BlockchainTime
+import           Ouroboros.Consensus.BlockchainTime (slotLengthFromSec)
 import           Ouroboros.Consensus.Config
 import qualified Ouroboros.Consensus.HardFork.History as HardFork
+                     (defaultEraParams)
 import qualified Ouroboros.Consensus.Ledger.Abstract as Lgr
 import           Ouroboros.Consensus.Util
 import           Ouroboros.Consensus.Util.IOLike
